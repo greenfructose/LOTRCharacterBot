@@ -27,7 +27,7 @@ lotr_api_quote_character = f'https://the-one-api.dev/v2/character/{character_id}
 quote = quote_response['dialog']
 movie = requests.get(lotr_api_quote_movie, headers=headers).json()['docs'][0]['name']
 character = requests.get(lotr_api_quote_character, headers=headers).json()['docs'][0]['name']
-
+quote = " ".join(quote.split()).replace(" ,", " ")
 print(quote)
 print(character)
 print(movie)
@@ -48,3 +48,15 @@ mastodon = Mastodon(
     api_base_url=mastodon_instance_url
 )
 mastodon.status_post(message)
+
+# Tweet
+consumer_key = config.get('TWITTER_API', 'consumer_key')
+consumer_key_secret = config.get('TWITTER_API', 'consumer_key_secret')
+oauth_token = config.get('TWITTER_API', 'oauth_token')
+oauth_token_secret = config.get('TWITTER_API', 'oauth_token_secret')
+account_screen_name = config.get('TWITTER_API', 'account_screen_name')
+account_user_id = config.get('TWITTER_API', 'account_user_id')
+auth = OAuthHandler(consumer_key, consumer_key_secret)
+auth.set_access_token(oauth_token, oauth_token_secret)
+twitter_api = API(auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
+twitter_api.update_status(message)
