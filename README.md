@@ -1,2 +1,2 @@
 # LOTRCharacterBot
-Bot that tweets and toots character profiles for Lord of the Rings characters
+Bot that tweets and toots random quotes from Lord of the Rings characters
