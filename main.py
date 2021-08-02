@@ -2,6 +2,8 @@
 # https://the-one-api.dev/
 
 import configparser, requests, random
+from datetime import datetime
+
 from tweepy import OAuthHandler, API
 from mastodon import Mastodon
 
@@ -13,18 +15,36 @@ config.read(f'{WRK_DIR}config')
 
 # LOTR api access
 lotr_access_token = config.get('LOTR_API', 'access_token')
-headers = {'Authorization' : f'Bearer {lotr_access_token}'}
+headers = {'Authorization': f'Bearer {lotr_access_token}'}
 lotr_api_quote = 'https://the-one-api.dev/v2/quote?limit=2390'
 quote_response = requests.get(lotr_api_quote, headers=headers).json()
 random_index = random.randint(0, 2390)
-quote = quote_response['docs'][random_index]
-movie_id = quote['movie']
-character_id = quote['character']
+quote_response = quote_response['docs'][random_index]
+movie_id = quote_response['movie']
+character_id = quote_response['character']
 lotr_api_quote_movie = f'https://the-one-api.dev/v2/movie/{movie_id}'
 lotr_api_quote_character = f'https://the-one-api.dev/v2/character/{character_id}'
-movie = requests.get(lotr_api_quote_movie, headers=headers).json()
-character = requests.get(lotr_api_quote_character, headers=headers).json()
+quote = quote_response['dialog']
+movie = requests.get(lotr_api_quote_movie, headers=headers).json()['docs'][0]['name']
+character = requests.get(lotr_api_quote_character, headers=headers).json()['docs'][0]['name']
 
-print(quote['dialog'])
-print(character['docs'][0]['name'])
-print(movie['docs'][0]['name'])
+print(quote)
+print(character)
+print(movie)
+print(datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+print('____________________________________________________________')
+
+message = (f'"{quote.strip()}"\n'
+           f'{character.strip()},\n'
+           f'{movie.strip()}\n'
+           f'Source: https://the-one-api.dev\n'
+           f'#lotr #lordoftherings')
+
+# Toot
+mastodon_access_token = config.get('MASTODON_API', 'access_token')
+mastodon_instance_url = config.get('MASTODON_API', 'instance_url')
+mastodon = Mastodon(
+    access_token=mastodon_access_token,
+    api_base_url=mastodon_instance_url
+)
+mastodon.status_post(message)
